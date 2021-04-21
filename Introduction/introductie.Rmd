@@ -21,10 +21,15 @@ dY = 10 - 0.1 * (Y+10)
 De twee constantes zijn de + 10 en de - 10%
 
 #### [2] Welke variabele uit de vergelijking veranderd steeds?  
-Y. 
+
+Y.
+
 #### [3] Wat is de initiele waarde van de variabele uit vraag 2?  
-0. 
-#### [4] Wat is het tijdsframe van dit experiment? (t = 0 tot t = ……. ). 
+
+0.
+
+#### [4] Wat is het tijdsframe van dit experiment? (t = 0 tot t = ……. ).
+
 90. 
 
 #### [5] Wanneer is het evenwichtsmoment?
@@ -33,17 +38,32 @@ Y.
 count <- 0
 dY <- 1
 total <- 0
+count_l <- c()
+total_l <- c()
+dY_l <- c()
+dY <- 1
+
 while (dY != 0) {
   count <- count + 1
   dY = 10 - 0.1 * (total+10)
   total <- total + ceiling(dY)
+  count_l <- c(count_l, count)
+  total_l <- c(total_l, total)
+  dY_l <- c(dY_l, dY)
 }
+menm <- data.frame(time = count_l, tot = total_l, dY = dY_l)
 cat("Evenwichtsmoment is bij: ", count, "\tCeiling is: " , total)
+plot(tot ~ time, data = menm, pch=19, col="blue", xlab="time", ylab="Total M&M's")
+lines(menm$tot ~ menm$time, xlim=range(0), ylim=range(100), pch=16, col="red")
+
 ```
-#### [6] Uit welke variabele uit de vergelijking kunnen we dat aflezen?
+
+#### [6] Uit welke variabele uit de vergelijking kunnen we dat aflezen?  
+
 dY = 0
 
 ### Opdracht 2
+
 ```{r}
 library(deSolve)
 
