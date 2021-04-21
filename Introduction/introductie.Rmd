@@ -1,6 +1,6 @@
 ---
 title: "Thema_Opdracht08_introductie"
-author: "Sander J. Bouwman"
+author: "Kasper Notebomer, Susan Reefman, Sander J. Bouwman"
 date: "21/04/2021"
 output:
   pdf_document: default
