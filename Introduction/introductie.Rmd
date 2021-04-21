@@ -1,0 +1,46 @@
+---
+title: "Thema_Opdracht08_introductie"
+author: "Sander J. Bouwman"
+date: "21/04/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introductie opdracht
+
+Iedere groep krijgt een zak M&M’s en een schaal. We gaan vervolgens de schaal vullen volgens het volgende principe: voeg 10 stuks toe en haal vervolgens 10% eraf (toevoeging = +10 - 0.1 * nieuw volume) oftewel
+dY = 10 - 0.1 * (Y+10)
+
+#### [1] Welke parameters (constantes) zitten er in de vergelijking?
+
+De twee constantes zijn de + 10 en de - 10%
+
+#### [2] Welke variabele uit de vergelijking veranderd steeds?  
+Y. 
+#### [3] Wat is de initiele waarde van de variabele uit vraag 2?  
+0. 
+#### [4] Wat is het tijdsframe van dit experiment? (t = 0 tot t = ……. ). 
+90. 
+
+#### [5] Wanneer is het evenwichtsmoment?
+  
+```{r}
+count <- 0
+dY <- 1
+total <- 0
+while (dY != 0) {
+  count <- count + 1
+  dY = 10 - 0.1 * (total+10)
+  total <- total + ceiling(dY)
+}
+cat("Evenwichtsmoment is bij: ", count, "\tCeiling is: " , total)
+```
+#### [6] Uit welke variabele uit de vergelijking kunnen we dat aflezen?
+dY = 0
+
+### Opdracht 2
