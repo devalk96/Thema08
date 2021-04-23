@@ -94,3 +94,26 @@ head(out)
 plot(out)
 ```
 
+### Opdracht 3.   
+
+#### SCRIPTS. 
+
+#### [1] Welke parameters (constantes) zitten er in de vergelijking(en)?    
+
+a, b and c are three parameters. 
+  
+#### [2] Wat is/zijn de initiële waarde(s). 
+X = 1. 
+Y = 1. 
+Z = 1. 
+a = -8/3. 
+b = -10. 
+c = 28. 
+
+#### [3] Wat is het tijdsframe van dit experiment?   
+
+100 dagen met een increment van 0.01. 
+
+#### [4] Beschrijf in je eigen woorden wat de plots laten zien (indien van toepassing). 
+
+Graph 1: X tegen tijd, Graph 2: Y tegen tijd, Graph 3: Z tegen tijd, Graph 4: Z tegen X. 
