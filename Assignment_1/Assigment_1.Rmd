@@ -42,9 +42,10 @@ To reach the goal the R package deSolve is used. There are two parameters progra
 
 ## Theory
 
-```{r, echo=FALSE, out.width='95%'}
+```{r, echo=FALSE, out.width='70%'}
 knitr::include_graphics('model.png')
 ```
+
 This is the biological model used. R is the number of transcripts, r is the rate of decay of existing transcripts and m is the number of new transcripts produced per second
 
 For this project a rather simple (commonly) model was used.  
@@ -74,7 +75,7 @@ The used model doesn’t factor in these individual processes but rather takes t
 
 ## The software model
 
-To make the dynamic model we made use of the deSolve package in r. The formula used for the model is dR/dt = -rR + m.
+To make the dynamic model we made use of the deSolve package in r. The formula used for the model is dR/dt = -rR + m. To read more about this formula please refer to this study \cite{Chen99}.
 
 ```{r}
 library(deSolve)
@@ -123,13 +124,14 @@ It is important to note that we used a 15 minute time frame instead of per secon
 \label{param_table}
 $\textbf{Parameter}$             &$\textbf{Value}$& $\textbf{Unit}$              \\ \hline
 \endhead
-$r$       & 0.55   & $percentage/15min$            \\ \hline
+$r$       & 0.55   & $decay factor/15min$            \\ \hline
 $m$       & 275    & $mRNA/15min$                  \\ \hline
 $R$       & 500    & $mRNA$                        \\ \hline
 \end{longtable}
 
 
 # Results
+
 ```{r}
 plot(out, out2, out3, main = "ammount of mRNA transcripts over time", 
      ylab="number of mRNA transcripts", xlab="timepoint", 
@@ -157,7 +159,10 @@ This project could be expanded in the future by making a more sophisticated dyna
 
 \begin{thebibliography}{9}
 
-\bibitem{Soertaert10}
-Soetaert, K., Petzoldt, T., and Woodrow Setzer, R.: \textit{Solving differential equations in R: package deSolve}, J. Stat. Softw., 33, 1-25, 2010.
+\bibitem{Timmers18}
+H. T. M. Timmers and L. Tora: \textit{Transcript Buffering: A Balancing Act between mRNA Synthesis and mRNA Degradation}, Molecular Cell, 10-4, 2018.
+
+\bibitem{Chen99}
+T. Chen, H. L. He and G. M. Church: \textit{MODELING GENE EXPRESSION WITH DIFFERENTIAL EQUATIONS},  Pacific Symposium of Biocomputing, 1999.
 
 \end{thebibliography}
