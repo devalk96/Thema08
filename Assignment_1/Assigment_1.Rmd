@@ -42,9 +42,8 @@ To reach the goal the R package deSolve is used. There are two parameters progra
 
 ## Theory
 
-
 ```{r, echo=FALSE, out.width='95%'}
-#knitr::include_graphics('model.png')
+knitr::include_graphics('model.png')
 ```
 This is the biological model used. R is the number of transcripts, r is the rate of decay of existing transcripts and m is the number of new transcripts produced per second
 
