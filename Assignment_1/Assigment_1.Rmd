@@ -159,10 +159,11 @@ This project could be expanded in the future by making a more sophisticated dyna
 
 \begin{thebibliography}{9}
 
+\bibitem{Chen99}
+T. Chen, H. L. He and G. M. Church: \textit{MODELING GENE EXPRESSION WITH DIFFERENTIAL EQUATIONS},  Pacific Symposium of Biocomputing, 1999.
+
 \bibitem{Timmers18}
 H. T. M. Timmers and L. Tora: \textit{Transcript Buffering: A Balancing Act between mRNA Synthesis and mRNA Degradation}, Molecular Cell, 10-4, 2018.
 
-\bibitem{Chen99}
-T. Chen, H. L. He and G. M. Church: \textit{MODELING GENE EXPRESSION WITH DIFFERENTIAL EQUATIONS},  Pacific Symposium of Biocomputing, 1999.
 
 \end{thebibliography}
