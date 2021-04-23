@@ -1,0 +1,65 @@
+---
+title: "Assignment_1_Kasper"
+author: "Kasper Notebomer, Susan Reefman, Sander J. Bouwman"
+date: "4/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Opdracht 1.0
+
+dR/dt = -rR + m
+
+[1] Welke parameters moet je programmeren?
+r & m
+
+[2] Zoek bronnen op internet die uitleggen waar de formule dR/dt = -rR + m vandaan komt.
+
+
+[3] Teken het biologisch model en leg de vertaling naar de formule uit.
+We zijn geintereseert in de verandiring van het aantal transcripts over tijd. De factoren die hier effect op hebben de hoeveelheid mRNA dat word gemaakt per seconde en de hovoeveelheid mRNA dat word afgebroken.
+
+[4] Wat is de return waarde van de model functie in R? Waarom return je die en niet R zelf?
+Een lijst met de waarde van dR/dt, dat is de verandering van de hoeveelheid mRNA bij de gegeven hoeveelheid mRNA. Dit doen we omdat dit een dynamisch systeem is.
+
+## Opdracht 2.0
+
+```{r}
+parameters <- c(r = 0.5, m = 50) 
+parameters2 <- parameters
+parameters3 <- parameters
+parameters2[1] <- 0.4
+parameters3[1] <- 0.65
+
+
+# define model 
+transcripts <- function(t, R, parms){
+  with(as.list(c(parms)),{
+         dR <- -r * R + m
+         return(list(c(dR)))
+       }
+       )
+}
+
+#initial state
+state <- c(R = 100)
+
+#define time sequence you want to run the model
+times <- seq(0, 10,  by = 0.1)
+
+# run simulation using continuous approach
+out  <- ode(times = times, y = state,   parms = parameters, func = transcripts, method = "euler")
+out2 <- ode(times = times, y = state,   parms = parameters2, func = transcripts, method = "euler")
+out3 <- ode(times = times, y = state,   parms = parameters3, func = transcripts, method = "euler")
+
+
+plot(out, out2, out3, main = "ammount of mRNA transcripts over time", ylab="number of mRNA transcripts", xlab="timepoint", lty=1, col = c("black", "purple", "orange"))
+legend(x = 7.5, y = 95, lty = 1, col = c("black", "purple", "orange"), legend = c("Steady", "Increase", "Decrease"))
+```
+
+## Opdracht 3.0
+
+
