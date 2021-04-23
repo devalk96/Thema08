@@ -61,6 +61,7 @@ Describe each element and the transformations
 
 - Describe the software tools used, as well as the libraries
 - Describe the software implementation (note: code below is an example)
+
 ```{r}
 library(deSolve)
 parameters <- c(r = 0.5, m = 50) 
