@@ -1,0 +1,33 @@
+---
+title: "Week_2"
+author: "Sander Bouwman"
+date: "28/04/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Currently Glucocorticoids are the most effective anti-inflammatory therapy for asthma, but are yet relative ineffective when used for treatment of chronic obstructive pulmonary disease (COPD). The underlying mechanism is by supressing multiple inflammatory genes by reversing histone acetylation of these active genes.
+
+.......
+
+
+```{r declaring values}
+
+ks_Rm = 2.90
+IC50_Rm = 26.2
+kon = 0.00329
+kT = 0.63
+kre = 0.57
+Rf = 0.49
+kd_R = 0.0572
+kd_Rm = 0.612
+ks_r = 3.22
+
+
+```
+
