@@ -33,7 +33,13 @@ Introduction of the research and introduction research questions
 Give an explanation of the model with citations of source \cite{Soertaert10} (replace this with actual source)
 and formula explanation
 
-$$\frac{\delta R}{\delta t} = -r * R + m $$
+$$\frac{\delta mRNA_{r}}{\delta t} = k_{s\_Rm} \cdot (1 - \frac{DR(N)}{IC_{50\_Rm + DR(N)}}) - k_{d\_Rm} \cdot mRNA_{r}$$
+
+$$\frac{\delta R}{\delta t} = k_{s\_R} \cdot mRNA_{r} + R_{f} \cdot k_{re} \cdot DR(N) - k_{on} \cdot D \cdot R - k_{d\_R} \cdot R$$
+
+$$\frac{\delta DR}{\delta t} = k_{on} \cdot D \cdot R - k_{T} \cdot DR$$
+
+$$\frac{\delta DR(N)}{\delta t} = k_{T} \cdot DR - k_{re} \cdot DR(N)$$
 Describe each element and the transformations
 
 # Methods
@@ -79,13 +85,6 @@ times <- seq(0, 48, by = 0.01)
 
 out <- ode(y = state, times = times, func = Gluco, parms = parameters)
 head(out)
-
-par(las=1)
-plot(out, xlab = "Time (h)", 
-     ylab = c("Conc. (fmol/g)", " conc. protein (fmol/mg)", "conc. protein (fmol/mg)", "conc. protein (fmol/mg)"), 
-     main = c("Receptor mRNA (liver)", "Free receptor", "Drug-receptor complex", "Activated receptor"),
-     col="purple", ylim = list(c(0,5), c(0,300), c(0,50), c(0,50)))
-# 0-5, 0-300, 0-50, 0-50
 ```
 
 ## Model configuration
@@ -96,9 +95,27 @@ Explain chosen initial state, parameter values and time sequence. Use tables wit
 \label{param_table}
 $\textbf{Parameter}$             &$\textbf{Value}$& $\textbf{Unit}$              \\ \hline
 \endhead
-$a$       & 0.08  & $hour^{-1}$         \\ \hline
-$b$       & 0.06  & $hour^{-1}$         \\ \hline
-$c$       & 0.06  & $hour^{-1}$         \\ \hline
+$k_{s\_RM}$       & 2.90            & $fmol/g \  liver/h$      \\ \hline
+$IC_{50\_Rm}$     & 26.2            & $fmol/mg \ protein$     \\ \hline
+$k_{on}$          & 0.00329         & $L/nmol/h$            \\ \hline
+$k_{T}$           & 0.63            & $1 / h$               \\ \hline
+$k_{re}$          & 0.57            & $1 / h$               \\ \hline
+$Rf$              & 0.49            & $ $                   \\ \hline
+$k_{d\_R}$        & 0.0572          & $1 / h$               \\ \hline
+$k_{d\_Rm}$       & 0.612           & $ $                   \\ \hline
+$k_{s\_r}$        & 3.22            & $ $                   \\ \hline
+$D$               & 20*1000/374.471 & $nmol/L$              \\ \hline
+\end{longtable}
+
+\begin{longtable}[l]{l|l|l}
+\caption{Initial Values} \\ \hline
+\label{param_table}
+$\textbf{Variable}$         &$\textbf{Initial Value}$& $\textbf{Unit}$      \\ \hline
+\endhead
+$R_{m0}$        & 4.74      & $fmol/g \ liver$        \\ \hline
+$R_{0}$         & 267       & $fmol/g \ protein$      \\ \hline
+$DR$            & 0         & $fmol/g \ protein$      \\ \hline
+$DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
 \end{longtable}
 
 
@@ -107,6 +124,12 @@ Introduction of results, how does it answer your research questions.
 ```{r}
 #plot(out)
 #code to generate figures with title, subscripts, legenda etc
+par(las=1)
+plot(out, xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)", "Conc. protein (fmol/mg)", "Conc. protein (fmol/mg)", "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)", "Free receptor", "Drug-receptor complex", "Activated receptor"),
+     col="purple", ylim = list(c(0,5), c(0,300), c(0,50), c(0,50)))
+# 0-5, 0-300, 0-50, 0-50
 ```
 
 - Describe what can be seen in such way that it leads to an answer to your research questions
