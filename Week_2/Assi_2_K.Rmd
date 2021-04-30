@@ -1,0 +1,127 @@
+---
+title: "Assignment_2"
+author: "Kasper"
+date: "4/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+Introduction of the research and introduction research questions
+
+## Goal
+  - Describe Goal (not the educational goal but the research goal)
+  - Describe how you reach the goal (e.g. make model and figures, use different setting)
+  - formulate hypothesis
+
+## Theory
+
+- Describe biological model
+- Picture of the biological model
+
+```{r, echo=FALSE, out.width='95%'}
+#knitr::include_graphics('example.png')
+```
+Give an explanation of the model with citations of source \cite{Soertaert10} (replace this with actual source)
+and formula explanation
+
+$$\frac{\delta R}{\delta t} = -r * R + m $$
+Describe each element and the transformations
+
+# Methods
+
+## The software model
+
+- Describe the software tools used, as well as the libraries
+- Describe the software implementation (note: code below is an example)
+```{r}
+library(deSolve)
+
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, 48, by = 0.01)
+
+
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+head(out)
+
+
+plot(out, xlab = "Time (h)", 
+     ylab = c("(fmol/g liver)", "(fmol/mg protein)", "(fmol/mg protein)", "(fmol/mg protein)"), 
+     main = c("Receptor mRNA", "Free receptor consetration", "Drug-receptor complex", "Activated receptor complex"),
+     col="purple")
+```
+
+## Model configuration
+
+Explain chosen initial state, parameter values and time sequence. Use tables with values as for example below
+\begin{longtable}[l]{l|l|l}
+\caption{Parameter Values} \\ \hline
+\label{param_table}
+$\textbf{Parameter}$             &$\textbf{Value}$& $\textbf{Unit}$              \\ \hline
+\endhead
+$a$       & 0.08  & $hour^{-1}$         \\ \hline
+$b$       & 0.06  & $hour^{-1}$         \\ \hline
+$c$       & 0.06  & $hour^{-1}$         \\ \hline
+\end{longtable}
+
+
+# Results
+Introduction of results, how does it answer your research questions.
+```{r}
+#plot(out)
+#code to generate figures with title, subscripts, legenda etc
+```
+
+- Describe what can be seen in such way that it leads to an answer to your research questions
+- Give your figures a number and a descriptive title.
+- Provide correct axis labels (unit and quantity), legend and caption.
+- Always refer to and discuss your figures and tables in the text - they never stand alone.
+
+
+# Discussion and Conclusion
+## Discussion
+- Compare your results with what is expecting from the literature and discuss differences with them.
+- Discuss striking and surprising results.
+- Discuss weaknesses in your research and how they could be addressed.
+
+## General conclusion and perspective
+Discuss what your goal was, what the end result is and how you could continue working from here.
+
+
+\begin{thebibliography}{9}
+
+\bibitem{Soertaert10}
+Soetaert, K., Petzoldt, T., and Woodrow Setzer, R.: \textit{Solving differential equations in R: package deSolve}, J. Stat. Softw., 33, 1-25, 2010.
+
+\end{thebibliography}
