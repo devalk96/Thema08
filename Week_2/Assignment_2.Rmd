@@ -14,22 +14,32 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Introduction
-Introduction of the research and introduction research questions
+# Introduction  
+This research is implementing a model for the expression of glucocorticoid receptors (GR), in which down-regulation by corticosteroids is present.  
+
+Corticosteroids are used for the treatment of many chronic inflammatory and immune diseases, including asthma. These diseases are characterized by inflammation of the airways. 
 
 ## Goal
-  - Describe Goal (not the educational goal but the research goal)
-  - Describe how you reach the goal (e.g. make model and figures, use different setting)
-  - formulate hypothesis
+Simulating the dynamics of glucocorticoid receptor while under the influence of glucocorticoid. Using deSolve and R according to a 2011 paper by Barnes. 
 
 ## Theory
 
-- Describe biological model
-- Picture of the biological model
-
-```{r, echo=FALSE, out.width='95%'}
-#knitr::include_graphics('example.png')
+Currently glucocorticoids are the most effective anti-inflammatory therapy for asthma but are yet relative ineffective when used for treatment of chronic obstructive pulmonary disease (COPD). The underlying mechanism is by supressing multiple inflammatory genes by reversing histone acetylation of these active genes. (2011, Barnes) Glucocorticoids diffuse across the cell membrane and can bind to glucocorticoid receptors (GR). The glucocorticoid receptors in turn homodimerize and bind to glucocorticoid response elements (GRE) in the promoter region of glucocorticoid-responsive genes and this interaction switches gene transcription on (or on occasion off). *Figure 1* shows a more in depth view of the pathway. 
+  
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Source: Journal of pharmacology and experimental therapeutics vol 307, No.1"}
+knitr::include_graphics('images/pathway.png')
 ```
+
+Naturally these glucocorticoids are synthetised as a reaction on factors such as: 
+
+* Low blood sugar 
+* Stress 
+* Trauma 
+
+These glucocorticoids are responsible for multiple homeostatic functions such as metabolism, immune system. The primary changes which glucocorticoids cause are increasing blood sugar levels, increase of metabolism rate, slowing inflammation, lowering bone synthesis and changes in emotional state.  
+
+The changes which glucocorticoids cause on the rate of inflammation makes this an interesting path in reducing inflammation. There are various conditions in which reducing inflammation is a desired effect such as: asthma, organ transplants and auto-immune diseases.   
+
 Give an explanation of the model with citations of source \cite{Soertaert10} (replace this with actual source)
 and formula explanation
 
@@ -40,7 +50,7 @@ $$\frac{\delta R}{\delta t} = k_{s\_R} \cdot mRNA_{r} + R_{f} \cdot k_{re} \cdot
 $$\frac{\delta DR}{\delta t} = k_{on} \cdot D \cdot R - k_{T} \cdot DR$$
 
 $$\frac{\delta DR(N)}{\delta t} = k_{T} \cdot DR - k_{re} \cdot DR(N)$$
-Describe each element and the transformations
+
 
 # Methods
 
@@ -84,6 +94,10 @@ times <- seq(0, 48, by = 0.01)
 
 
 out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+```
+
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Source: flowdiagram glucocorticoide receptor dynamica"}
+knitr::include_graphics('images/model.png')
 ```
 
 ## Model configuration
