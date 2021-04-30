@@ -2,16 +2,12 @@
 title: "Assignment_2"
 author: "Kasper"
 date: "4/28/2021"
-<<<<<<< HEAD
 header-includes:
    - \usepackage{longtable}
    - \usepackage{hyperref}
 output:
   pdf_document: default
   html_document: default
-=======
-output: html_document
->>>>>>> a4bca19cdef868d1d442bb2cabd9aa9233dc5d00
 ---
 
 ```{r setup, include=FALSE}
@@ -84,20 +80,12 @@ times <- seq(0, 48, by = 0.01)
 out <- ode(y = state, times = times, func = Gluco, parms = parameters)
 head(out)
 
-<<<<<<< HEAD
 par(las=1)
 plot(out, xlab = "Time (h)", 
      ylab = c("Conc. (fmol/g)", " conc. protein (fmol/mg)", "conc. protein (fmol/mg)", "conc. protein (fmol/mg)"), 
      main = c("Receptor mRNA (liver)", "Free receptor", "Drug-receptor complex", "Activated receptor"),
      col="purple", ylim = list(c(0,5), c(0,300), c(0,50), c(0,50)))
 # 0-5, 0-300, 0-50, 0-50
-=======
-
-plot(out, xlab = "Time (h)", 
-     ylab = c("(fmol/g liver)", "(fmol/mg protein)", "(fmol/mg protein)", "(fmol/mg protein)"), 
-     main = c("Receptor mRNA", "Free receptor consetration", "Drug-receptor complex", "Activated receptor complex"),
-     col="purple")
->>>>>>> a4bca19cdef868d1d442bb2cabd9aa9233dc5d00
 ```
 
 ## Model configuration
