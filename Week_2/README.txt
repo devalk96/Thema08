@@ -8,7 +8,7 @@ Version:
     1.0
 
 Name:
-    Deelopdracht_2
+    Assignment_2.Rmd
 
 
 Description
@@ -23,11 +23,9 @@ Installation:
 
 
 Usage:
-    1. Open Assignment_1.Rmd with R-Studio.
-    2. It is possible to change the simulation output by changing various parameters: 
-		- 
-    
-   3. Knit to generate a PDF report.
+    1. Open Assignment_2.Rmd with R-Studio.
+    2. It is possible to change the simulation output by changing various parameters, these parameters can be found in the Assignment_2.Rmd file.
+    3. Knit to generate a PDF report.
 
 Support:
     Kasper Notebomber: k.a.notebomer@st.hanze.nl
