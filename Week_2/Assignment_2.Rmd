@@ -40,14 +40,12 @@ These glucocorticoids are responsible for multiple homeostatic functions such as
 
 The changes which glucocorticoids cause on the rate of inflammation makes this an interesting path in reducing inflammation. There are various conditions in which reducing inflammation is a desired effect such as: asthma, organ transplants and auto-immune diseases.   
 
-Give an explanation of the model with citations of source \cite{Soertaert10} (replace this with actual source)
-and formula explanation
-
-```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Source: flowdiagram glucocorticoide receptor dynamica"}
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Flowdiagram glucocorticoide receptor dynamica [2]"}
 knitr::include_graphics('images/model.png')
 ```
 
-The biological model is shown if *Figure 2*. The model consist of the following four formulas:
+The biological model is shown if *Figure 2*. This model consist of four variables. mRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid repeptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma consentration of MPL in molar. 
+The model consist of the following four formulas:
 
 $$\frac{\delta mRNA_{r}}{\delta t} = k_{s\_Rm} \cdot (1 - \frac{DR(N)}{IC_{50\_Rm} + DR(N)}) - k_{d\_Rm} \cdot mRNA_{r}$$
 This is the formula for calculating the difference in mRNAr over time. k~s_Rm~ is the a constant depicting the speed of the synthesis of the mRNA for the receptor protein. This constant is then multiplied by the following equation. 
@@ -186,10 +184,6 @@ The most important variable for the efficiency of the medicine is the concentrat
 
 # Discussion and Conclusion
 ## Discussion
-- Compare your results with what is expecting from the literature and discuss differences with them.
-- Discuss striking and surprising results.
-- Discuss weaknesses in your research and how they could be addressed.
-
 Our results are in line with what we would expect from literature on the subject.
 There seem to be no significant deviations in results from what we would expect when comparing to literature on the subject.
 The experiment could possibly be improved by using parameters for a smaller time frame, so instead of per hour we would use parameters of a rate of change per minute. This will however only have a very small and possibly insignificant effect on the result. A future improvement that could cause a significant change in results would be the incorporation of even more relatively small and seemingly insignificant parameters in the dynamic model.
