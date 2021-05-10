@@ -76,8 +76,9 @@ The dynamic model was programmed in r using the deSolve package.
 All the formulas were implemented using a function. This function calculates the difference over time for all the variables. The function was given all the parameters and initial values using a vector. All the parameters and the function where then given to the ode function, which calculated the results using the Euler method. 
 
 The outputs where then plotted using the plot function.
+All of the executed code can be found at the appendix.
 
-```{r}
+```{r, echo=F}
 library(deSolve)
 
 parameters <- c(ks_rm = 2.90,
@@ -150,7 +151,7 @@ $DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
 
 
 # Results
-```{r Figure_1, fig.cap="Results of the dynamic model"}
+```{r Figure_1, fig.cap="Results of the dynamic model", echo=F}
 #plot(out)
 #code to generate figures with title, subscripts, legenda etc
 par(las=1)
@@ -203,3 +204,64 @@ Barnes, Peter J.: \textit{Glucocorticosteroids: current and future directions}, 
 Feenstra, F.: \textit{Expressie van glucocorticoid receptoren}, Hanze University of Applied Science.
 
 \end{thebibliography}
+
+\newpage
+## Apendix
+### modelling  
+```{r, eval=F}
+library(deSolve)
+
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, 48, by = 0.01)
+
+
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+```
+### plotting   
+```{r, eval=F}
+#plot(out)
+#code to generate figures with title, subscripts, legenda etc
+par(las=1)
+plot(out, xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
