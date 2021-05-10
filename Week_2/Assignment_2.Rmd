@@ -20,7 +20,7 @@ This research is implementing a model for the expression of glucocorticoid recep
 Corticosteroids are used for the treatment of many chronic inflammatory and immune diseases, including asthma. These diseases are characterized by inflammation of the airways. 
 
 ## Goal
-Simulating the dynamics of glucocorticoid receptor while under the influence of glucocorticoid. Using deSolve and R according to a 2011 paper by Barnes. 
+The goal of this project is to simulate the dynamics of glucocorticoid receptors while under the influence of glucocorticoids, based on a model described by a 2011 paper by Barnes \cite{Barnes11}.
 
 ## Theory
 
