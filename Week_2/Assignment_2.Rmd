@@ -64,7 +64,7 @@ This is the formula for calculating the difference in MPL-receptor complex densi
 
 
 $$\frac{\delta DR(N)}{\delta t} = k_{T} \cdot DR - k_{re} \cdot DR(N)$$
-This is the formula for calculating the difference in MPL-receptor complex in the nucleus density over time. k~T~ is a first-order rate constant for the speed of translacation of the MPL-receptor complex over the nuclear membrane from the cytosol to the nucleus. The last peramater in this formula is k~re~. This parameter is a first-order rate constant for the receptors in the nucleus that are "recovered" and get translocated over the nuclear membrane from the nucleus to the cytosol.
+This is the formula for calculating the difference in MPL-receptor complex in the nucleus density over time. k~T~ is a first-order rate constant for the speed of translacation of the MPL-receptor complex over the nuclear membrane from the cytosol to the nucleus. The last parameter in this formula is k~re~. This parameter is a first-order rate constant for the receptors in the nucleus that are "recovered" and get translocated over the nuclear membrane from the nucleus to the cytosol.
 
 
 
