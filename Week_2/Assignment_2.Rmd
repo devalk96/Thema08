@@ -73,7 +73,7 @@ This is the formula for calculating the difference in MPL-receptor complex in th
 ## The software model
 The dynamic model was programmed in r using the deSolve package. 
 
-All the formulas were implemented using a function. This function calculates the difference over time for all the variables. The function was given all the parameters and initial values using a vector. All the parameters and the function where then given to the ode function, which calculated the results using the euler method. 
+All the formulas were implemented using a function. This function calculates the difference over time for all the variables. The function was given all the parameters and initial values using a vector. All the parameters and the function where then given to the ode function, which calculated the results using the Euler method. 
 
 The outputs where then plotted using the plot function.
 
@@ -150,7 +150,6 @@ $DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
 
 
 # Results
-Introduction of results, how does it answer your research questions.
 ```{r Figure_1, fig.cap="Results of the dynamic model"}
 #plot(out)
 #code to generate figures with title, subscripts, legenda etc
