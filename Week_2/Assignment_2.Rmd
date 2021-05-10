@@ -118,7 +118,7 @@ out <- ode(y = state, times = times, func = Gluco, parms = parameters)
 ## Model configuration
 
 The parameters and initial values that were used where chosen based on the values given by this website \cite{Bioinf}. The values originated from experiments done with methylprednisolon on rats. The MPL concentration was 20 ng/ml. For the model we needed this value in nmol/L. 20 ng/ml equated to 20 * 1000 / 374,471 nmol/L. This value was used as the value for parameter D. 
-The model will be simulated for a timeframe of two days. Seeing as the parameters used are per hour this means we'll have to use a time sequence of 0 to 48 hours. This means the experiment will run from t=0 till t=48. The steps in the time sequence where set to 0.01 to smoothen the resulting lines in the plots. Below are two tables showing all the paramaters and variables and thier values.
+The model will be simulated for a timeframe of two days. Seeing as the parameters used are per hour this means we'll have to use a time sequence of 0 to 48 hours. This means the experiment will run from t=0 till t=48. The steps in the time sequence where set to 0.01 to smoothen the resulting lines in the plots. Below are two tables showing all the paramaters and variables and their values.
 
 \begin{longtable}[l]{l|l|l}
 \caption{Parameter Values} \\ \hline
