@@ -170,6 +170,8 @@ plot(out, xlab = "Time (h)",
                  c(0,50)))
 ```
 
+This research is conducting an experiment to look at the difference in certain variables commonly associated with the glucocorticoid pathway, in different conditions in time. In *Figure 3* a dynamic model of this system is shown.
+
 The model displayed in *Figure 3* shows that the amount of free receptors drastically decreases as time goes on until a new equilibrium is reached. This is to be expected as over time more of the free receptors will be bound by the drug, until at one point there is a balance between the amount of receptors produced and the amount of drugs that can bind in a specific timeframe.
 
 Looking at the concentration of the MPL-receptor complex in the cytosol in *Figure 3*, we can observe a rapid increase until around 5 hours. After this point the concentration begins to decrease towards a new equilibrium. This rapid increase at the start can be attributed to the rather long time it takes for the complex to be translocated over the nuclear membrane. The rapid decrease after the peak can be explained by the decrease of free receptors over time. Seeing as over time the number of free receptors decreases, the amount of MPL-receptor complex that can be formed also decreases. So, the spike we see at around 5 hours seem to be an accumulation of this complex that simply hasn't been translocated yet. 
@@ -183,12 +185,11 @@ The most important variable for the efficiency of the medicine is the concentrat
 
 # Discussion and Conclusion
 ## Discussion
-Our results are in line with what we would expect from literature on the subject.
-There seem to be no significant deviations in results from what we would expect when comparing to literature on the subject.
+Our results are in line with what we would expect from literature on the subject as there seems to be no significant deviations in results from what we would expect when comparing to literature on the subject.
 The experiment could possibly be improved by using parameters for a smaller time frame, so instead of per hour we would use parameters of a rate of change per minute. This will however only have a very small and possibly insignificant effect on the result. A future improvement that could cause a significant change in results would be the incorporation of even more relatively small and seemingly insignificant parameters in the dynamic model.
 
 ## General conclusion and perspective
-Improving the dynamic model by incorporating more paramaters.
+Improving the dynamic model by incorporating more parameters.
 The goal was to simulate the dynamics of glucocorticoid receptors while under the influence of glucocorticoids. This goal was achieved.
 Possible future improvement to this project would include the implementation of a more sophisticated dynamic model that takes more variables and parameters into account when simulating the results.
 
