@@ -1,0 +1,88 @@
+---
+title: "Help"
+author: "Kasper"
+date: "5/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r, echo=F}
+library(deSolve)
+
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 14.59*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, 48, by = 0.01)
+
+```
+
+```{r}
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+out <- as.data.frame(out)
+out$dose <- 0.1
+
+parameters["D"] <- 39.925
+out2 <- ode(y = state, times = times, func = Gluco, parms = parameters)
+out2 <- as.data.frame(out2)
+out2$dose <- 0.3
+
+out3 <- rbind(out, out2)
+out3[out3$dose==0.1,]
+plot(MRNAr ~ time, out3[out3$dose==0.1,])
+abline(MRNAr ~ time, out3[out3$dose==0.1,])
+```
+
+
+
+```{r Figure_1, fig.cap="Results of the dynamic model", echo=F}
+#plot(out)
+#code to generate figures with title, subscripts, legenda etc
+par(las=1)
+plot(out, xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+
+
+```
