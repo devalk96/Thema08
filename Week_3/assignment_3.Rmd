@@ -1,30 +1,210 @@
 ---
-title: "assignment_3"
-author: "Sander Bouwman"
-date: "10/05/2021"
-output: html_document
+title: "Assignment_2"
+author: "Kasper Notebomer, Susan Reefman, Sander J. Bouwman"
+date: "`r Sys.Date()`"
+header-includes:
+   - \usepackage{longtable}
+   - \usepackage{hyperref}
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Introduction  
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This research is a detailed analysis of the dynamic model for the expression of glucocorticoids receptors \cite{Ons eigen artikel?}. The model represents the system in which multiple variables that are commonly associated with the glucocorticoid pathway.  The experimental data is going to be compared to the simulation data.   
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Goal
+The goal of this project is to analyze the model, validate experimental data and simulate scenarios. We expect that the experimental data will be in line with the model.  
 
-```{r cars}
-summary(cars)
+## Theory
+The biological model consists of four variables. MRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid receptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma concentration of MPL in molar.  
+
+*Figure 1* shows a more in depth view of the pathway. 
+  
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Source: Journal of pharmacology and experimental therapeutics vol 307, No.1"}
+knitr::include_graphics('images/pathway.png')
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Flowdiagram glucocorticoide receptor dynamica [2]"}
+knitr::include_graphics('images/model.png')
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The biological model is shown if *Figure 2*. This model consist of four variables. mRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid repeptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma consentration of MPL in molar. 
+
+
+
+# Methods
+
+## The software model
+
+
+```{r, echo=F}
+library(deSolve)
+
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, 48, by = 0.01)
+
+
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+```
+
+## Model configuration
+
+The parameters and initial values that were used are based on the results from the experiment with rats. In the experiments methylprednisolone was administered for 7 days under constant infusion of 0.1 or 0.3 mg drug per kg rat per hour. Concentration of the drug was measured in ng per mL, of the receptor mRNA in fmol per g liver and of the free receptor in fmol per mg protein. 
+D was calculated by the following formula: 
+
+$$\frac{{MPL-concentration}  \cdot 1000}{374.471} $$ 
+
+The MPL concentration is the median MPL concentration from the given data. We use the median of the experimental data so that outliers have less influence on the concentration. The median MPL concentration for 0.1 dose is 14.59 ng/ml, for 0.3 dose it is 39.925 ng/ml. We assume that the MPL concentration is constant over time.  
+
+
+\begin{longtable}[l]{l|l|l}
+\caption{Parameter Values} \\ \hline
+\label{param_table}
+$\textbf{Parameter}$             &$\textbf{Value}$& $\textbf{Unit}$              \\ \hline
+\endhead
+$k_{s\_RM}$       & 2.90            & $fmol/g \  liver/h$      \\ \hline
+$IC_{50\_Rm}$     & 26.2            & $fmol/mg \ protein$     \\ \hline
+$k_{on}$          & 0.00329         & $L/nmol/h$            \\ \hline
+$k_{T}$           & 0.63            & $1 / h$               \\ \hline
+$k_{re}$          & 0.57            & $1 / h$               \\ \hline
+$Rf$              & 0.49            & $ $                   \\ \hline
+$k_{d\_R}$        & 0.0572          & $1 / h$               \\ \hline
+$k_{d\_Rm}$       & 0.612           & $ $                   \\ \hline
+$k_{s\_r}$        & 3.22            & $ $                   \\ \hline
+$D$               & 20*1000/374.471 & $nmol/L$              \\ \hline
+\end{longtable}
+
+\begin{longtable}[l]{l|l|l}
+\caption{Initial Values} \\ \hline
+\label{param_table}
+$\textbf{Variable}$         &$\textbf{Initial Value}$& $\textbf{Unit}$      \\ \hline
+\endhead
+$R_{m0}$        & 4.74      & $fmol/g \ liver$        \\ \hline
+$R_{0}$         & 267       & $fmol/g \ protein$      \\ \hline
+$DR$            & 0         & $fmol/g \ protein$      \\ \hline
+$DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
+\end{longtable}
+
+
+# Results
+```{r Figure_1, fig.cap="Results of the dynamic model", echo=F}
+#plot(out)
+#code to generate figures with title, subscripts, legenda etc
+```
+
+
+
+
+# Discussion and Conclusion
+## Discussion
+
+
+## General conclusion and perspective
+
+
+
+\begin{thebibliography}{9}
+
+\bibitem{Barnes11}
+Barnes, Peter J.: \textit{Glucocorticosteroids: current and future directions}, British journal of pharmacology, 163.1, 29-43, 2011.
+
+\bibitem{Bioinf}
+Feenstra, F.: \textit{Expressie van glucocorticoid receptoren}, Hanze University of Applied Science.
+
+\end{thebibliography}
+
+\newpage
+## Apendix
+### modelling  
+```{r, eval=F}
+library(deSolve)
+
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, 48, by = 0.01)
+
+
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+```
+### plotting   
+```{r, eval=F}
+#plot(out)
+#code to generate figures with title, subscripts, legenda etc
+par(las=1)
+plot(out, xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
