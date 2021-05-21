@@ -17,6 +17,19 @@ knitr::opts_chunk$set(echo = TRUE)
 # Introduction  
 
 This research is a detailed analysis of the dynamic model for the expression of glucocorticoids receptors \cite{Ons eigen artikel?}. The model represents the system in which multiple variables that are commonly associated with the glucocorticoid pathway.  The experimental data is going to be compared to the simulation data.   
+We analyze the model by asking multiple questions in order to research if the model and experimental data is valid.  
+
+- *Validation*
+
+- What is the time course concentration of the activated drug-receptor complex if there is no auto-regulation of glucocorticoid receptor? 
+
+- What is the time course of receptor and mRNA concentrations when the drug treatment is stopped? 
+
+- What is the effect of different values of kon and kre on the receptor and mRNA dynamics? 
+
+- What is the effect of blocked synthesis of the receptor mRNA? 
+
+- What is the dynamic of the system when the baseline rate of production of mRNA of the receptor is increased or decreased 2 or 5 fold? 
 
 ## Goal
 The goal of this project is to analyze the model, validate experimental data and simulate scenarios. We expect that the experimental data will be in line with the model.  
@@ -122,15 +135,59 @@ $DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
 
 
 # Results
-```{r Figure_1, fig.cap="Results of the dynamic model", echo=F}
-#plot(out)
-#code to generate figures with title, subscripts, legenda etc
-```
 
+##A
+
+If there is no effect of drug on the synthesis of the receptor mRNA, then the synthesis of the receptor mRNA is constant. 
+When the synthesis of the receptor mRNA is constant then the density of free receptor decreases first and then reaches an equilibrium over time. This is because the synthesis and is constant, so the number of free receptors is also constant.  
+The time course concentration of the drug-receptor complex reaches over time an equilibrium. At time = 0 there is no complex, because there is an oversupply of free receptor the model reaches fast its optimum. After the optimum the amount of drug-receptor complex decreases and reaches an equilibrium. This is because the synthesis of receptor mRNA and the drug concentration constant. 
+The time course concentration of the activated drug-receptor complex has the same curve as the time course concentration of the drug-receptor complex. Only the time frame is *somewhat later*. This is because initially a drug-receptor complex must be formed before activation can take place. 
+
+##B
+
+When the drug treatment is stopped the receptor mRNA synthesis is no longer suppressed. This results in a rapid increase in receptor mRNA after there is no drug present. After a period of time the amount of receptor mRNA reaches an equilibrium again.  
+The amount of free receptor decreases initially but reaches an equilibrium when the synthesis and complex forming is constant. When the drug treatment is stopped, the synthesis of receptor mRNA is increasing, this is directly linked to the increase of free receptors. After a while also the number of free receptors reaches a steady state.  
+The time course of (activated) drug-receptor complex is when the drug treatment is stopped shows a rapid decrease. This is because the stopped treatment causes no drug to bind to the receptor mRNA. The complex is not formed and subsequently cannot be activated. Eventually the number of drug-receptor complexes is equal to zero.  
+Because there is no binding of receptor mRNA, the total receptor concentration increases over time and reaches a steady state when the synthesis and degradation of receptor mRNA is constant. 
+
+##C
+When the association rate of the receptor is higher than the rate of the model, the amount of receptor mRNA decreases less rapidly. The reverse is true when the association rate of the receptor is lower than the rate of the model. In the *figure ...* can be seen that there are differences between the difference of higher association and the model and lower association and the model. When the association rate of the receptor is lower than the model, it has more influence on the amount of receptor mRNA than when the association rate of the receptor is higher than the model.  
+
+When the association rate of the receptor is higher, then more receptors are binding to the drug. This means that there are less free receptors available. When the association rate is lower then more receptors do not bind to the drug than the receptors that do bind which results in a low free receptor density.  
+
+The most differences between the model and the simulations can be seen looking at the drug-receptor complexes. With a higher association rate, the number of drug-receptor complexes increases very rapidly. This is because there is in the beginning of the simulation a high concentration of free receptors and drug is available and they have a high association for binding. With a lower association rate, the binding between drug and receptors is less self-evident. Overall, when each simulation reaches a steady state the number of drug-receptor complexes does not difference greatly.  
+
+The total receptor density between t = 0 and t = steady state difference not great when the association rate is lower. The reverse is true for when the association is higher.  
+
+
+Dissociation rates 
+
+##D
+If the synthesis of the receptor was completely blocked, there would be in time only the free receptor available that are recycled. The amount of free receptor is based on k~re~. The parameter R needs to be put to zero, because there is no synthesis of new receptors. R = 0 
+
+ 
+*Receptor mRNA vs time moet nog*
+ 
+When synthesis of the receptor is completely blocked, over time, there is no free receptors available which means the density gets to zero. When no free receptors are available, no drug-receptor complexes can be formed which means the amount of (activated) complexes decreases over time. Also, the total receptor density goes to zero over time when all synthesis is stopped.  
+
+
+##E
+What is the dynamic of the system when the baseline rate of production of mRNA of the receptor is increased or decreased? 
+
+In the plots *figure … * can be seen the orange and red line that implies a decrease in baseline rate of production of mRNA of the receptor. The blue lines (light blue and dark blue) are implying an increase in baseline rate of production of mRNA of the receptor.  
+
+Overall, the differences between the simulations are minimal. The only simulation that is off from the rest is the orange one that implies that the baseline rate is 5 times smaller than the original baseline rate. A smaller baseline rate has more influence on the simulation than a higher baseline rate.  
 
 
 
 # Discussion and Conclusion
+## Conclusion 
+
+In this research we analyzed the dynamic model for the expression of glucocorticoids receptors and multiple simulations of this model.  
+If there is no effect of drug on the synthesis of the receptor mRNA, then the synthesis of the receptor mRNA is constant. 
+
+When the association rate is higher, more free receptors bind to the drug, which results in more drug-receptor complexes and less available free receptors. When the association rate is lower, less receptors bind to the drug in comparison to the model. This means that less drug-receptor complexes are formed and more of free receptors stay available.  
+
 ## Discussion
 
 
