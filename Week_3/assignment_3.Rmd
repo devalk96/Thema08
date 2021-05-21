@@ -543,7 +543,7 @@ To improve this study in the future a more sophisticated dynamic model could be 
 \begin{thebibliography}{9}
 
 \bibitem{SBK21}
-Bouwman, S., Reefman, S., Notebomer, K.: \textit{Assignment 2}, Hanze University of Applied Science.
+Bouwman, S., Reefman, S., Notebomer, K.: \textit{Assignment\_2}, Hanze University of Applied Science.
 
 \bibitem{Barnes11}
 Barnes, Peter J.: \textit{Glucocorticosteroids: current and future directions}, British journal of pharmacology, 163.1, 29-43, 2011.
