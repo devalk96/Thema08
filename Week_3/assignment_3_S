@@ -1,0 +1,179 @@
+---
+title: "assignment_3"
+author: "Sander Bouwman"
+date: "10/05/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo=F}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Code
+### Assignment 1  
+```{r data-parsing, echo=F, message=F}
+library(ggplot2)
+library(pander)
+library(dplyr)
+
+data <- read.csv("Data/MPL.csv", sep = ",", header = T, na.strings = "NA")
+data_week2  <- read.csv("Data/out_export.csv", sep = ",", header = T)
+
+
+median_MPL.01 <- median(data$MPL_conc[data$dose==0.1], na.rm=T)
+median_MPL.03 <- median(data$MPL_conc[data$dose==0.3], na.rm=T)
+median_dr_conc <- data.frame(Dose = c(0.1, 0.3), `ng/ml` = c(median_MPL.01, median_MPL.03))
+pander(median_dr_conc)
+
+medians <- aggregate(data[,c("MPL_conc","mRNA","Free_receptor")],list(data$dose,data$time), median, na.rm=T)
+names(medians)[1:2] <- c("dose","time")
+```
+
+
+```{r, echo=F}
+library(deSolve)
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = median_MPL.01*1000/374.471)
+
+state <- c(MRNAr = 4.74,
+           R = 267,
+           DR = 0,
+           DRn = 0)
+
+Gluco <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+times <- seq(0, max(medians$time), by = 0.01)
+
+```
+
+```{r, echo=F}
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+out <- as.data.frame(out)
+out$dose <- 0.1
+
+parameters.D <- median_MPL.03 * 1000 / 374.471
+out2 <- ode(y = state, times = times, func = Gluco, parms = parameters)
+out2 <- as.data.frame(out2)
+out2$dose <- 0.3
+
+out3 <- rbind(out, out2)
+```
+
+
+```{r plotting, echo=F, message=F}
+#par(mfrow=c(1, 2))
+#plot(mRNA ~ time, data=medians)
+# Remove dose 0.0
+medians.filtered <- medians[medians$dose != 0.0, ]
+
+medians.filtered.01 <- subset(medians.filtered, dose==0.1)
+medians.filtered.03 <- subset(medians.filtered, dose==0.3)
+
+data.filtered <- data[data$dose != 0.0, ]
+data.filtered.01 <- subset(data.filtered, dose==0.1)
+data.filtered.03 <- subset(data.filtered, dose==0.3)
+
+out3.filtered.01 <- subset(out3, dose==0.1)
+out3.filtered.03 <- subset(out3, dose==0.3)
+
+
+p <- ggplot(data=medians.filtered, aes(x = time)) +
+  geom_line(data = medians.filtered.01, aes(y = mRNA, colour = "0.1 experiment"), size = 0.5, linetype = "dashed") + 
+  geom_line(data = medians.filtered.03, aes(y = mRNA, colour = "0.3 experiment"), size = 0.5, linetype = "dashed") + ylim(0,7) + 
+  geom_point(data = data.filtered.01, aes(y=mRNA), size = 0.5) + 
+  geom_point(data = data.filtered.03, aes(y=mRNA), size = 0.5) + 
+  geom_line(data = out3.filtered.01, aes(y = MRNAr, colour = "0.1 model"), size = 0.5) + 
+  geom_line(data = out3.filtered.03, aes(y = MRNAr, colour = "0.3 model"), size = 0.5) + 
+  labs(title="Comparison between model and experiment", fill = "Dose") 
+
+
+  
+p 
+```
+
+> [1] Why is it best practice to plot the median for the experimental data? Explain in your report. 
+
+
+> [2] How do the results of the simulations depend on the dose and concentration of the drug? Compare the model variables mRNA, R with the experimental data by running the simulations adjusting dosis D and plot these to find the answer.
+
+> [3] Are the results of the model in line with experimental data? If not, what could be the reason? Think of at least one explanation. Try to test it with simulations (you will get bonus points for that, your explanation does not need to be correct, but should be logical).
+
+### Assignment 2
+
+> [1] What would be the time course concentration of the activated drug-receptor complex if there was no auto-regulation of glucocorticoid receptor, i.e. if there was not effect of drug on the synthesis of the receptor mRNA? What formula needs to be changed? Adjust the model, run the simulation and plot the results to find out.
+
+```{r}
+
+# Observation time series (using function seq)
+ObservationTimes<-seq(0,24*2,by=1)
+ObservationTimes2 <- seq(0,24*3,by=1)
+
+# call lsoda and store result in out
+out1 <- ode(
+   y=state, 
+   times=ObservationTimes, 								
+   func=Gluco, 
+   parms=parameters
+)
+
+parameters.after <- parameters
+
+
+parameters.after["D"] <- 0
+
+out2 <- ode(
+   y=out1[length(ObservationTimes),2:5], 
+   times=ObservationTimes2,   							
+   func=Gluco, 
+   parms=parameters.after
+) 
+
+out2[,1] <- out2[,1]+ObservationTimes[length(ObservationTimes)]
+
+out <- rbind(out1,out2)
+out<-as.data.frame(out)
+
+out$tot <- out$R + out$DR + out$DRn
+
+# Make plot of concentration of receptor mRNa and free receptor density
+par(mfrow=c(2,3))
+  plot(out$time,out$Rm,ylim = c(0,5), xlab="Time",ylab="receptor mRNA",type="l",lwd=2)
+  plot(out$time,out$R, ylim = c(0,500), xlab="Time",ylab="free receptor density",type="l",lwd=2)
+  plot(out$time,out$DR, ylim = c(0,50), xlab="Time",ylab="crug-receptor complex",type="l",lwd=2)
+  plot(out$time,out$DRN, ylim = c(0,50), xlab="Time",ylab="activated receptor complex",type="l",lwd=2)
+  plot(out$time,out$tot, ylim = c(0,500), xlab="Time",ylab="total receptor conc.",type="l",lwd=2)
+```
+> [3] Different corticosteroids show different association rates from receptors (kon) and different dissociation rates (in this model reflected by kre). Assuming the same concentrations of the drug, what is the effect of different values of kon and kre (consider 2 and 5 times increase and decrease of both parameters separately) on the receptor and mRNA dynamics? Adjust kon and kre as below and plot the results of the simulation for each change. Note: Simulations should be run for 4 new values of kon: 0.00329/5, 0.00329/2, 0.00329*2 and 0.00329*5. The results should be compared to the basic scenario when kon=0.00329 Separately, simulations should be run for 4 new values of kre: 0.57/5, 0.57/2, 0.57*2 and 0.57*5. The results should be compared to the basic scenario when kre= 0.57.
+
+```{r}
+
+```
+
+> [4] What would happen if the synthesis of the receptor was completely blocked? Which parameter needs to be put to zero? Adjust the parameter, run the simulations and plot the results.
+
+> [5] What is the dynamic of the system when the baseline rate of production of mRNA of the receptor is increased or decreased 2 or 5 fold (recalculate the rate of mRNA degradation so that the steady-state assumption at baseline (without the drug) is still valid, i.e. mRNA levels are constant when there is not drug)? Mind you: ks_Rm values should be changed, but we know that if without the drug the system is at steady-state then kd_Rm = ks_Rm/Rm0. Therefore if we change ks_Rm we need to change kd_Rm as well. Also after we recalculate the value of kd_Rm for the baseline conditions, the simulations should be run with drug present. Simulations should be run for 4 different scenarios:
+
+* ks_Rm = 2.9/5 and kd_Rm=2.9/5/4.74
+* ks_Rm = 2.9/2 and kd_Rm=2.9/2/4.74
+* ks_Rm = 2.9*2 and kd_Rm=2.9*2/4.74
+* ks_Rm = 2.9*5 and kd_Rm=2.9*5/4.74
+
