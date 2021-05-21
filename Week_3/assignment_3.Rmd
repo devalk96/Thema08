@@ -1,13 +1,14 @@
 ---
-title: "Assignment_2"
+title: "Assignment_3"
 author: "Kasper Notebomer, Susan Reefman, Sander J. Bouwman"
 date: "`r Sys.Date()`"
-header-includes:
-   - \usepackage{longtable}
-   - \usepackage{hyperref}
 output:
   pdf_document: default
   html_document: default
+  word_document: default
+header-includes:
+- \usepackage{longtable}
+- \usepackage{hyperref}
 ---
 
 ```{r setup, include=FALSE}
@@ -16,10 +17,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction  
 
-This research is a detailed analysis of the dynamic model for the expression of glucocorticoids receptors \cite{Ons eigen artikel?}. The model represents the system in which multiple variables that are commonly associated with the glucocorticoid pathway.  The experimental data is going to be compared to the simulation data.   
+This research is a detailed analysis of the dynamic model for the expression of glucocorticoids receptors \cite{SBK21}. The model represents the system in which multiple variables that are commonly associated with the glucocorticoid pathway.  The experimental data is going to be compared to the simulation data.   
 We analyze the model by asking multiple questions in order to research if the model and experimental data is valid.  
 
-- *Validation*
+- Is the dynamic model a good representation of the pathway when comparing to experimental data?
 
 - What is the time course concentration of the activated drug-receptor complex if there is no auto-regulation of glucocorticoid receptor? 
 
@@ -35,20 +36,14 @@ We analyze the model by asking multiple questions in order to research if the mo
 The goal of this project is to analyze the model, validate experimental data and simulate scenarios. We expect that the experimental data will be in line with the model.  
 
 ## Theory
-The biological model consists of four variables. MRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid receptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma concentration of MPL in molar.  
-
-*Figure 1* shows a more in depth view of the pathway. 
-  
-```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Source: Journal of pharmacology and experimental therapeutics vol 307, No.1"}
-knitr::include_graphics('images/pathway.png')
-```
+The biological model consists of four variables. MRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid receptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma concentration of MPL in molar.
 
 
-```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Flowdiagram glucocorticoide receptor dynamica [2]"}
+```{r, echo=F, out.width='50%', fig.align="center", fig.cap="Flowdiagram glucocorticoide receptor dynamica [3]"}
 knitr::include_graphics('images/model.png')
 ```
 
-The biological model is shown if *Figure 2*. This model consist of four variables. mRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid repeptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma consentration of MPL in molar. 
+The biological model is shown if *Figure 1*. This model consist of four variables. mRNAr is the amount of mRNA coding for receptors, R is the density of free glucocorticoid receptors in the cytosol, DR is the density of MPL-receptor complex and DR(N) is the amount of MPL-receptor complex in the nucleus. In this model D is a parameter that stands for the plasma concentration of MPL in molar. 
 
 
 
@@ -56,6 +51,15 @@ The biological model is shown if *Figure 2*. This model consist of four variable
 
 ## The software model
 
+The dynamic model used was created in a prior study on the subject \cite{SBK21} and was programmed in r using the deSolve package. 
+
+All the formulas were implemented using a function. This function calculates the difference over time for all the variables. The function was given all the parameters and initial values using a vector. All the parameters and the function where then given to the ode function, which calculated the results using the Euler method. 
+
+The outputs where then plotted using the plot function.
+All of the executed code can be found at the appendix.
+
+To awnser what would happen if we removed autoregulation from the model was changed by removing the following part of the differential equation to calculate the change in mRNA density was removed.
+$$(1 - \frac{DR(N)}{IC_{50\_Rm + DR(N)}})$$ 
 
 ```{r, echo=F}
 library(deSolve)
@@ -89,11 +93,36 @@ Gluco <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+Gluco_reg <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+Gluco_no <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    if (t > 24) D <- 0
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
 times <- seq(0, 48, by = 0.01)
-
-
-out <- ode(y = state, times = times, func = Gluco, parms = parameters)
 ```
+
 
 ## Model configuration
 
@@ -136,45 +165,354 @@ $DR(N)$         & 0         & $fmol/g \ protein$      \\ \hline
 
 # Results
 
-##A
+## Validation of the model  
 
-If there is no effect of drug on the synthesis of the receptor mRNA, then the synthesis of the receptor mRNA is constant. 
+```{r data-parsing, echo=F, message=F, fig.cap="Comparison between model and experiment. The median of the experimental of two differen doses of MPL was used."}
+library(ggplot2)
+library(pander)
+library(dplyr)
+
+data <- read.csv("Data/MPL.csv", sep = ",", header = T, na.strings = "NA")
+#data_week2  <- read.csv("Data/out_export.csv", sep = ",", header = T)
+
+
+median_MPL.01 <- median(data$MPL_conc[data$dose==0.1], na.rm=T)
+median_MPL.03 <- median(data$MPL_conc[data$dose==0.3], na.rm=T)
+median_dr_conc <- data.frame(Dose = c(0.1, 0.3), `ng/ml` = c(median_MPL.01, median_MPL.03))
+pander(median_dr_conc)
+
+medians <- aggregate(data[,c("MPL_conc","mRNA","Free_receptor")],list(data$dose,data$time), median, na.rm=T)
+names(medians)[1:2] <- c("dose","time")
+
+times2 <- seq(0, max(medians$time), by = 0.01)
+
+out <- ode(y = state, times = times2, func = Gluco, parms = parameters)
+out <- as.data.frame(out)
+out$dose <- 0.1
+
+parameters["D"] <- median_MPL.03 * 1000 / 374.471
+out2 <- ode(y = state, times = times2, func = Gluco, parms = parameters)
+out2 <- as.data.frame(out2)
+out2$dose <- 0.3
+
+out3 <- rbind(out, out2)
+
+medians.filtered <- medians[medians$dose != 0.0, ]
+
+medians.filtered.01 <- subset(medians.filtered, dose==0.1)
+medians.filtered.03 <- subset(medians.filtered, dose==0.3)
+
+data.filtered <- data[data$dose != 0.0, ]
+data.filtered.01 <- subset(data.filtered, dose==0.1)
+data.filtered.03 <- subset(data.filtered, dose==0.3)
+
+out3.filtered.01 <- subset(out3, dose==0.1)
+out3.filtered.03 <- subset(out3, dose==0.3)
+
+
+p <- ggplot(data=medians.filtered, aes(x = time)) +
+  geom_line(data = medians.filtered.01, aes(y = mRNA, colour = "0.1 experiment"), size = 0.5, linetype = "dashed") + 
+  geom_line(data = medians.filtered.03, aes(y = mRNA, colour = "0.3 experiment"), size = 0.5, linetype = "dashed") + ylim(0,7) + 
+  geom_point(data = data.filtered.01, aes(y=mRNA), size = 0.5) + 
+  geom_point(data = data.filtered.03, aes(y=mRNA), size = 0.5) + 
+  geom_line(data = out3.filtered.01, aes(y = MRNAr, colour = "0.1 model"), size = 0.5) + 
+  geom_line(data = out3.filtered.03, aes(y = MRNAr, colour = "0.3 model"), size = 0.5) + 
+  labs(title="Comparison between model and experiment", fill = "Dose") 
+
+
+  
+p 
+```
+
+Results of validation:
+In *Figure 2* we can see two solid lines, these represent the expected concentrations calculated using the dynamic model. The dashed lines represent the median of the concentration found by the experiment. When looking at both of the lines there seems to be quite a difference in the expected concentration compared to the concentration found by the experiment. These findings indicate that the dynamic model may be incorrect compared to reality.
+
+
+## The effect of removing autoregulation  
+
+```{r, echo=F, fig.cap="The results of the dynamic model that has the autoregulation disabled."}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+out <- ode(y = state, times = times, func = Gluco_reg, parms = parameters)
+par(las=1)
+plot(out, 
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
+
+If there is no effect of drug on the synthesis of the receptor mRNA, then the synthesis of the receptor mRNA is constant. This is shown in *Figure 3*. 
 When the synthesis of the receptor mRNA is constant then the density of free receptor decreases first and then reaches an equilibrium over time. This is because the synthesis and is constant, so the number of free receptors is also constant.  
 The time course concentration of the drug-receptor complex reaches over time an equilibrium. At time = 0 there is no complex, because there is an oversupply of free receptor the model reaches fast its optimum. After the optimum the amount of drug-receptor complex decreases and reaches an equilibrium. This is because the synthesis of receptor mRNA and the drug concentration constant. 
-The time course concentration of the activated drug-receptor complex has the same curve as the time course concentration of the drug-receptor complex. Only the time frame is *somewhat later*. This is because initially a drug-receptor complex must be formed before activation can take place. 
+The time course concentration of the activated drug-receptor complex has the same curve as the time course concentration of the drug-receptor complex. Only the time frame is slightly shifted towards the right. This is because initially a drug-receptor complex must be formed before activation can take place. 
 
-##B
 
-When the drug treatment is stopped the receptor mRNA synthesis is no longer suppressed. This results in a rapid increase in receptor mRNA after there is no drug present. After a period of time the amount of receptor mRNA reaches an equilibrium again.  
+## The effect of stopping drug after equilibrium is reached  
+
+```{r, echo=F, fig.cap="The results of running the dynamic model when stopping drug intace after equilibrium is reached."}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+out <- ode(y = state, times = times, func = Gluco_no, parms = parameters)
+par(las=1)
+plot(out, 
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
+
+When the drug treatment is stopped the receptor mRNA synthesis is no longer suppressed. This results in a rapid increase in receptor mRNA after there is no drug present, as shown in *Figure 4*. After a period of time the amount of receptor mRNA reaches an equilibrium again.  
 The amount of free receptor decreases initially but reaches an equilibrium when the synthesis and complex forming is constant. When the drug treatment is stopped, the synthesis of receptor mRNA is increasing, this is directly linked to the increase of free receptors. After a while also the number of free receptors reaches a steady state.  
 The time course of (activated) drug-receptor complex is when the drug treatment is stopped shows a rapid decrease. This is because the stopped treatment causes no drug to bind to the receptor mRNA. The complex is not formed and subsequently cannot be activated. Eventually the number of drug-receptor complexes is equal to zero.  
 Because there is no binding of receptor mRNA, the total receptor concentration increases over time and reaches a steady state when the synthesis and degradation of receptor mRNA is constant. 
 
-##C
-When the association rate of the receptor is higher than the rate of the model, the amount of receptor mRNA decreases less rapidly. The reverse is true when the association rate of the receptor is lower than the rate of the model. In the *figure ...* can be seen that there are differences between the difference of higher association and the model and lower association and the model. When the association rate of the receptor is lower than the model, it has more influence on the amount of receptor mRNA than when the association rate of the receptor is higher than the model.  
+
+## The effect of kon and kre on the model 
+
+```{r, echo=F, fig.cap="The effects of changing the kon parameter"}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+factors <- c(1/5,1/2,1,2,5)
+
+for (i in 1:length(factors)){
+  parameters["kon"] <- 0.00329 * factors[i]
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=2, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", 
+       legend=c("1/5","1/2","1","2","5"), 
+       lty = 1, 
+       col=c("orange","red","black","navyblue","lightblue"), 
+       title = "kon", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
+```
+
+```{r, echo=F, fig.cap="The effects of changing the kre parameter"}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+for (i in 1:length(factors)){
+  parameters["kre"] <- 0.57 * factors[i]
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=2, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", 
+       legend=c("1/5","1/2","1","2","5"), 
+       lty = 1, 
+       col=c("orange","red","black","navyblue","lightblue"), 
+       title = "kre", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
+```
+
+When looking at *Figure 5*, it shows that when the association rate of the receptor is higher than the rate of the model, the amount of receptor mRNA decreases less rapidly. The reverse is true when the association rate of the receptor is lower than the rate of the model. In the figure it can be seen that there are differences between the difference of higher association and the model and lower association and the model. When the association rate of the receptor is lower than the model, it has more influence on the amount of receptor mRNA than when the association rate of the receptor is higher than the model.  
 
 When the association rate of the receptor is higher, then more receptors are binding to the drug. This means that there are less free receptors available. When the association rate is lower then more receptors do not bind to the drug than the receptors that do bind which results in a low free receptor density.  
 
 The most differences between the model and the simulations can be seen looking at the drug-receptor complexes. With a higher association rate, the number of drug-receptor complexes increases very rapidly. This is because there is in the beginning of the simulation a high concentration of free receptors and drug is available and they have a high association for binding. With a lower association rate, the binding between drug and receptors is less self-evident. Overall, when each simulation reaches a steady state the number of drug-receptor complexes does not difference greatly.  
 
 The total receptor density between t = 0 and t = steady state difference not great when the association rate is lower. The reverse is true for when the association is higher.  
+Looking at *Figure 6* we can see that a different k~re~ value can cause drastic changes in the equilibrium of the system. This is expected as when the value of k~re~ is increased the speed at which receptors are "recovered" from the nucleus is higher. This causes the drug receptor complex concentration to be higher while the active-complex concentration becomes lower, seeing as it is recovered far quicker from the nucleus back to the cytosol.
 
+## The effect of blocking receptor synthesis  
 
-Dissociation rates 
+```{r, echo=F, fig.cap="The effects of changing the ksr parameter"}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
 
-##D
-If the synthesis of the receptor was completely blocked, there would be in time only the free receptor available that are recycled. The amount of free receptor is based on k~re~. The parameter R needs to be put to zero, because there is no synthesis of new receptors. R = 0 
+parameters["ks_r"] <- 0
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+par(las=1)
+plot(out, 
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
 
+If the synthesis of the receptor was completely blocked, there would be in time only the free receptor available that are recycled. The amount of free receptor is based on k~re~. The parameter k~sr~ needs to be put to zero, because there is no synthesis of new receptors.
  
-*Receptor mRNA vs time moet nog*
- 
-When synthesis of the receptor is completely blocked, over time, there is no free receptors available which means the density gets to zero. When no free receptors are available, no drug-receptor complexes can be formed which means the amount of (activated) complexes decreases over time. Also, the total receptor density goes to zero over time when all synthesis is stopped.  
+When synthesis of the receptor is completely blocked we can observe by looking at *Figure 7* that, over time, there is no free receptors available which means the density gets to zero. When no free receptors are available, no drug-receptor complexes can be formed which means the amount of (activated) complexes decreases over time. Also, the total receptor density goes to zero over time when all synthesis is stopped.  
 
 
-##E
+## The effect of changing the baseline rate of production of mRNA  
+
+```{r, echo=F, fig.cap="The effects of chaning the basline rate of production of mRNA"}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+factors <- c(1/5,1/2,1,2,5)
+
+for (i in 1:length(factors)){
+  ksyn_rm=2.9*factors[i]
+  kdgr_rm=ksyn_rm/4.74
+  parameters[c("ks_rm","kd_rm")] <- c(ksyn_rm, kdgr_rm)
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=1, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", legend=factors, 
+       lty = 1, 
+       col = c("orange","red","black","navyblue","lightblue"), 
+       title = "Multiplication factor", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
+```
+
 What is the dynamic of the system when the baseline rate of production of mRNA of the receptor is increased or decreased? 
 
-In the plots *figure … * can be seen the orange and red line that implies a decrease in baseline rate of production of mRNA of the receptor. The blue lines (light blue and dark blue) are implying an increase in baseline rate of production of mRNA of the receptor.  
+In the plots *Figure 8* can be seen the orange and red line that implies a decrease in baseline rate of production of mRNA of the receptor. The blue lines (light blue and dark blue) are implying an increase in baseline rate of production of mRNA of the receptor.  
 
 Overall, the differences between the simulations are minimal. The only simulation that is off from the rest is the orange one that implies that the baseline rate is 5 times smaller than the original baseline rate. A smaller baseline rate has more influence on the simulation than a higher baseline rate.  
 
@@ -189,13 +527,23 @@ If there is no effect of drug on the synthesis of the receptor mRNA, then the sy
 When the association rate is higher, more free receptors bind to the drug, which results in more drug-receptor complexes and less available free receptors. When the association rate is lower, less receptors bind to the drug in comparison to the model. This means that less drug-receptor complexes are formed and more of free receptors stay available.  
 
 ## Discussion
-
+When looking at the model compared to the experimental data there seems to be quite a discrepancy. This could largely be explained by the low sample count for most of the datapoint. The results would probably align better if there was more data and more timepoint. This would smooth out the concentration lines from the experiment. Doing this would generate more trustworthy ans significant results.
+The rest of the results seem to well aligned with expectations. When comparing to literature on the subject, the results seem trustworthy and correct.
+An improvement that could be made to get more accurate results would be to expand the current model with more variables, even some that might seems quite insignificant on their own. Seeing as using a multitude of these kinds of variables could prove to show quite a significant change in the resulting graphs.
 
 ## General conclusion and perspective
+In this research we analyzed the dynamic model for the expression of glucocorticoids receptors and multiple simulations of this model.  
+If there is no effect of drug on the synthesis of the receptor mRNA, then the synthesis of the receptor mRNA is constant. 
 
+When the association rate is higher, more free receptors bind to the drug, which results in more drug-receptor complexes and less available free receptors. When the association rate is lower, less receptors bind to the drug in comparison to the model. This means that less drug-receptor complexes are formed and more of free receptors stay available.  
+
+To improve this study in the future a more sophisticated dynamic model could be built that takes more variables into account in the differential equations. This could cause a slight increase in the accuracy of the results.
 
 
 \begin{thebibliography}{9}
+
+\bibitem{SBK21}
+Bouwman, S., Reefman, S., Notebomer, K.: \textit{Assignment 2}, Hanze University of Applied Science.
 
 \bibitem{Barnes11}
 Barnes, Peter J.: \textit{Glucocorticosteroids: current and future directions}, British journal of pharmacology, 163.1, 29-43, 2011.
@@ -207,7 +555,7 @@ Feenstra, F.: \textit{Expressie van glucocorticoid receptoren}, Hanze University
 
 \newpage
 ## Apendix
-### modelling  
+### Modelling  
 ```{r, eval=F}
 library(deSolve)
 
@@ -240,17 +588,111 @@ Gluco <- function(t, state, parameters) {
   }) # end with(as.list ...
 }
 
+Gluco_reg <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dMRNAr <- ks_rm - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
+Gluco_no <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    if (t > 24) D <- 0
+    # rate of change
+    dMRNAr <- ks_rm * (1 - DRn/(IC50_rm + DRn)) - kd_rm * MRNAr
+    dR <- ks_r * MRNAr + Rf * kre * DRn - kon * D * R - kd_r * R
+    dDR <- kon * D * R - kt * DR
+    dDRn <- kt * DR - kre * DRn
+    
+    # return the rate of change
+    list(c(dMRNAr, dR, dDR, dDRn))
+  }) # end with(as.list ...
+}
+
 times <- seq(0, 48, by = 0.01)
-
-
-out <- ode(y = state, times = times, func = Gluco, parms = parameters)
 ```
-### plotting   
+
+### Validation
+```{r, eval=F, message=F}
+library(ggplot2)
+library(pander)
+library(dplyr)
+
+data <- read.csv("Data/MPL.csv", sep = ",", header = T, na.strings = "NA")
+#data_week2  <- read.csv("Data/out_export.csv", sep = ",", header = T)
+
+
+median_MPL.01 <- median(data$MPL_conc[data$dose==0.1], na.rm=T)
+median_MPL.03 <- median(data$MPL_conc[data$dose==0.3], na.rm=T)
+median_dr_conc <- data.frame(Dose = c(0.1, 0.3), `ng/ml` = c(median_MPL.01, median_MPL.03))
+pander(median_dr_conc)
+
+medians <- aggregate(data[,c("MPL_conc","mRNA","Free_receptor")],list(data$dose,data$time), median, na.rm=T)
+names(medians)[1:2] <- c("dose","time")
+
+times2 <- seq(0, max(medians$time), by = 0.01)
+
+out <- ode(y = state, times = times2, func = Gluco, parms = parameters)
+out <- as.data.frame(out)
+out$dose <- 0.1
+
+parameters["D"] <- median_MPL.03 * 1000 / 374.471
+out2 <- ode(y = state, times = times2, func = Gluco, parms = parameters)
+out2 <- as.data.frame(out2)
+out2$dose <- 0.3
+
+out3 <- rbind(out, out2)
+
+medians.filtered <- medians[medians$dose != 0.0, ]
+
+medians.filtered.01 <- subset(medians.filtered, dose==0.1)
+medians.filtered.03 <- subset(medians.filtered, dose==0.3)
+
+data.filtered <- data[data$dose != 0.0, ]
+data.filtered.01 <- subset(data.filtered, dose==0.1)
+data.filtered.03 <- subset(data.filtered, dose==0.3)
+
+out3.filtered.01 <- subset(out3, dose==0.1)
+out3.filtered.03 <- subset(out3, dose==0.3)
+
+
+p <- ggplot(data=medians.filtered, aes(x = time)) +
+  geom_line(data = medians.filtered.01, aes(y = mRNA, colour = "0.1 experiment"), size = 0.5, linetype = "dashed") + 
+  geom_line(data = medians.filtered.03, aes(y = mRNA, colour = "0.3 experiment"), size = 0.5, linetype = "dashed") + ylim(0,7) + 
+  geom_point(data = data.filtered.01, aes(y=mRNA), size = 0.5) + 
+  geom_point(data = data.filtered.03, aes(y=mRNA), size = 0.5) + 
+  geom_line(data = out3.filtered.01, aes(y = MRNAr, colour = "0.1 model"), size = 0.5) + 
+  geom_line(data = out3.filtered.03, aes(y = MRNAr, colour = "0.3 model"), size = 0.5) + 
+  labs(title="Comparison between model and experiment", fill = "Dose") 
+
+
+  
+p 
+```
+
+### Autoregulation
 ```{r, eval=F}
-#plot(out)
-#code to generate figures with title, subscripts, legenda etc
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+out <- ode(y = state, times = times, func = Gluco_reg, parms = parameters)
 par(las=1)
-plot(out, xlab = "Time (h)", 
+plot(out, 
+     xlab = "Time (h)", 
      ylab = c("Conc. (fmol/g)",
               "Conc. protein (fmol/mg)",
               "Conc. protein (fmol/mg)",
@@ -264,4 +706,223 @@ plot(out, xlab = "Time (h)",
                  c(0,300),
                  c(0,50),
                  c(0,50)))
+```
+
+### Stopping drug
+```{r, eval=F}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+out <- ode(y = state, times = times, func = Gluco_no, parms = parameters)
+par(las=1)
+plot(out, 
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
+
+### kon & kre
+```{r, eval=F}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+factors <- c(1/5,1/2,1,2,5)
+
+for (i in 1:length(factors)){
+  parameters["kon"] <- 0.00329 * factors[i]
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=2, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", 
+       legend=c("1/5","1/2","1","2","5"), 
+       lty = 1, 
+       col=c("orange","red","black","navyblue","lightblue"), 
+       title = "kon", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
+```
+
+```{r, eval=F}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+for (i in 1:length(factors)){
+  parameters["kre"] <- 0.57 * factors[i]
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=2, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", 
+       legend=c("1/5","1/2","1","2","5"), 
+       lty = 1, 
+       col=c("orange","red","black","navyblue","lightblue"), 
+       title = "kre", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
+```
+
+### Blocking synthesis
+```{r, eval=F}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+parameters["ksr"] <- 0
+out <- ode(y = state, times = times, func = Gluco, parms = parameters)
+par(las=1)
+plot(out, 
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"),
+     col="purple",
+     ylim = list(c(0,5),
+                 c(0,300),
+                 c(0,50),
+                 c(0,50)))
+```
+
+### Baseline production rate
+```{r, eval=F}
+parameters <- c(ks_rm = 2.90,
+                IC50_rm = 26.2,
+                kon = 0.00329,
+                kt = 0.63,
+                kre = 0.57,
+                Rf = 0.49,
+                kd_r = 0.0572,
+                kd_rm = 0.612,
+                ks_r = 3.22,
+                D = 20*1000/374.471)
+
+factors <- c(1/5,1/2,1,2,5)
+
+for (i in 1:length(factors)){
+  ksyn_rm=2.9*factors[i]
+  kdgr_rm=ksyn_rm/4.74
+  parameters[c("ks_rm","kd_rm")] <- c(ksyn_rm, kdgr_rm)
+  out <- ode(y=state, 
+             times=times,   							
+             func=Gluco, 
+             parms=parameters) 
+  assign(paste("out", i, sep = ""), out)  
+}
+
+par(las=1)
+plot(out1, out2, out3, out4, out5, 
+     lwd=1, 
+     lty=1,
+     col=c("orange","red","black","navyblue","lightblue"),
+     xlab = "Time (h)", 
+     ylab = c("Conc. (fmol/g)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)",
+              "Conc. protein (fmol/mg)"), 
+     main = c("Receptor mRNA (liver)",
+              "Free receptor",
+              "Drug-receptor complex",
+              "Activated receptor complex"))
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", legend=factors, 
+       lty = 1, 
+       col = c("orange","red","black","navyblue","lightblue"), 
+       title = "Multiplication factor", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
 ```
