@@ -1,0 +1,119 @@
+---
+title: "Eind"
+author: "Kasper"
+date: "5/28/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(deSolve)
+
+
+parameters <- c(npat = 10,
+                nhcw = 9,
+                u = 0.173,
+                y = 0.173,
+                pi = 0.087,
+                c = 8,
+                Php = 0.0113,
+                c_a = 9,
+                Pph = 9,
+                HHC = 0.1,
+                lambda = (HHC*c_a*npat)/(1-HHC)*nhcw
+                )
+
+state <- c(Upat = 10,
+           Cpat = 0,
+           Uhcw = 9,
+           Chcw = 0)
+
+HandHygene <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dUpat <- -u * Upat - (c*Php*Upat*Chcw)/nhcw + (1 - pi) * (u*Upat+y*Cpat)
+    dCpat <- -y * Cpat + (c*Php*Upat*Chcw)/nhcw + pi * (u*Upat + y * Cpat)
+    dUhcw <- - (c*Pph*Cpat*Uhcw)/nhcw + lambda * Chcw
+    dChcw <- (c*Pph*Cpat*Uhcw)/nhcw - lambda * Chcw
+    
+    # return the rate of change
+    list(c(dUpat, dCpat, dUhcw, dChcw))
+  })
+}
+
+```
+
+```{r}
+times <- seq(0, 100, by = 0.01)
+
+out <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+parameters <- c(npat = 10,
+                nhcw = 9,
+                u = 0.173,
+                y = 0.173,
+                pi = 0.087,
+                c = 8,
+                Php = 0.0113,
+                c_a = 9,
+                Pph = 9,
+                HHC = 1,
+                lambda = (HHC*c_a*npat)/(1-HHC)*nhcw
+                )
+out2 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+plot(out, out2)
+```
+
+
+```{r}
+library(deSolve)
+
+parameters <- c(o = 0.067,
+                Np = 23,
+                Nh = 23,
+                alphap = 0.0435,
+                betap = 0.72,
+                betah = 0.20,
+                Yu = 0.067,
+                Yc = 0.046,
+                Yb = 0.7,
+                Kp = 0.000004,
+                Kh = 0.00001,
+                N = 0.1,
+                Uc = 1,
+                Vp = 235,
+                Vh = 235
+                )
+
+state <- c(Put = 10,
+           Pct = 13,
+           Hut = 17,
+           Hct = 6,
+           Bet = 1000)
+
+HandHygene <- function(t, state, parameters) {
+  with(as.list(c(state, parameters)),{
+    # rate of change
+    dPut <- (1-o) * (Yu * Put + Yc * Pct) - alphap * betap * (1-N) * Put * Hct - Kp * Put * Bet - Yu * Put
+    dPct <- o * (Yu * Put + Yc * Pct) + alphap * betap * (1-N) * Put * Hct +             Kp * Put * Bet - Yc * Pct
+    dHut <- -alphap * betah * (1-N) * Pct * Hut + Uc * Hct - Kh  * Hut * Bet
+    dHct <- alphap * betah * (1-N) * Pct * Hut - Uc * Hct + Kh * Hut * Bet
+    dBet <- Vp*Pct + Vh * Hct - Yb * Bet 
+    
+    # return the rate of change
+    list(c(dPut, dPct, dHut, dHct, dBet))
+  })
+}
+
+```
+
+```{r}
+times <- seq(0, 350, by = 0.01)
+
+out <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+parameters["N"] <- 0.4
+out2 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+plot(out, out2)
+```
