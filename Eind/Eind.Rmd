@@ -1,6 +1,6 @@
 ---
 title: "Eind"
-author: "Kasper"
+author: "Kasper, Sander, Susan"
 date: "5/28/2021"
 output: html_document
 ---
@@ -23,7 +23,7 @@ parameters <- c(npat = 10,
                 c_a = 9,
                 Pph = 9,
                 HHC = 0.1,
-                lambda = (HHC*c_a*npat)/(1-HHC)*nhcw
+                lambda = (0.1*9*10)/(1-0.1)*9
                 )
 
 state <- c(Upat = 10,
@@ -59,11 +59,43 @@ parameters <- c(npat = 10,
                 Php = 0.0113,
                 c_a = 9,
                 Pph = 9,
-                HHC = 1,
-                lambda = (HHC*c_a*npat)/(1-HHC)*nhcw
+                HHC = 0.4,
+                lambda = (0.4*9*10)/(1-0.4)*9
                 )
 out2 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
-plot(out, out2)
+parameters["HHC"] <- 0.9
+parameters["lambda"] <- (0.9*9*10)/(1-0.9)*9
+out3 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+
+plot(out, out2, out3,
+     lwd=1, 
+     lty=c(1,1,2),
+     col=c("Purple","Orange", "mediumvioletred"),
+     xlab = "Time (d)", 
+     ylab = c("Number of humans",
+              "Number of humans",
+              "Number of humans",
+              "Number of humans"), 
+     main = c("Uncolonized patients",
+              "Colonized patients",
+              "Uncolonized healthcare workers",
+              "Colonized healthcare worker"),
+      ylim = list(c(0,15),
+                  c(0,15),
+                  c(0,15),
+                  c(0,15)))
+
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+legend("bottom", legend=c(0.1, 0.4, 0.9), 
+       lty = c(1,1,2), 
+       col = c("Purple","Orange", "mediumvioletred"), 
+       title = "Hand hygiene", 
+       cex = 0.7, 
+       xpd=TRUE, 
+       horiz=TRUE, 
+       bty='n', 
+       seg.len = 1)
 ```
 
 
@@ -97,7 +129,7 @@ HandHygene <- function(t, state, parameters) {
   with(as.list(c(state, parameters)),{
     # rate of change
     dPut <- (1-o) * (Yu * Put + Yc * Pct) - alphap * betap * (1-N) * Put * Hct - Kp * Put * Bet - Yu * Put
-    dPct <- o * (Yu * Put + Yc * Pct) + alphap * betap * (1-N) * Put * Hct +             Kp * Put * Bet - Yc * Pct
+    dPct <- o * (Yu * Put + Yc * Pct) + alphap * betap * (1-N) * Put * Hct + Kp * Put * Bet - Yc * Pct
     dHut <- -alphap * betah * (1-N) * Pct * Hut + Uc * Hct - Kh  * Hut * Bet
     dHct <- alphap * betah * (1-N) * Pct * Hut - Uc * Hct + Kh * Hut * Bet
     dBet <- Vp*Pct + Vh * Hct - Yb * Bet 
@@ -115,5 +147,37 @@ times <- seq(0, 350, by = 0.01)
 out <- ode(y = state, times = times, func = HandHygene, parms = parameters)
 parameters["N"] <- 0.4
 out2 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
-plot(out, out2)
+parameters["N"] <- 0.9
+out3 <- ode(y = state, times = times, func = HandHygene, parms = parameters)
+par(mgp=c(3,1,0)) 
+plot(out, out2, out3,
+     lwd=1, 
+     lty=1,
+     col=c("Purple","Orange", "mediumvioletred"),
+     xlab = "Time (d)", 
+     ylab = c("Number of humans",
+              "Number of humans",
+              "Number of humans",
+              "Number of humans",
+              "Number of bacteria"), 
+     main = c("Uncolonized patients",
+              "Colonized patients",
+              "Uncolonized healthcare workers",
+              "Colonized healthcare worker",
+              "Bacterial load in environment"))
+
+par(fig=c(0,1,0,1), oma= c(0,0,0,0), mar = c(0,0,0,0), new=TRUE)
+plot(0,0, type='l', bty = 'n', xaxt='n', yaxt = 'n')
+coord <- par("usr")
+legend(x = coord[2] * 0.6, 
+       y = coord[4] * -0.3, 
+       legend=c(0.1, 0.4, 0.9), 
+       box.lty=1,
+       lty = 1, 
+       col = c("Purple","Orange", "mediumvioletred"), 
+       title = "Hand hygiene\ncompliance", 
+       cex = 1, 
+       xpd=TRUE, 
+       bty='n', 
+       seg.len = 1)
 ```
